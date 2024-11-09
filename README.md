@@ -179,18 +179,25 @@ document.getElementById("findImageSrc").addEventListener("click", () => {
 });
 ```
 
-# Usage
+## How to Use
 
-1. Open an Instagram post in your browser.
-2. Click the **Image Source Finder** extension icon in your browser toolbar.
-3. In the popup that appears, click the **Download Post** button to download the main image.
+1. **Install the Extension**:  
+   - Open Chrome and go to `chrome://extensions/`.
+   - Enable **Developer Mode** in the top right corner.
+   - Click on **Load unpacked** and select the folder where your extension files are located.
 
----
+2. **Navigate to an Instagram Post**:  
+   - Open any Instagram post URL in the format `https://www.instagram.com/p/*` on your browser.
 
-# Limitations and Notes
+3. **Click the Extension Icon**:  
+   - In the Chrome toolbar, click the extension icon.
+   - In the popup that appears, click the **"Download Post"** button.  
+   - The image will automatically begin downloading to your device.
 
-- **Class Dependency**: The extension relies on specific Instagram class names for identifying and extracting the image. If Instagram changes these class names, the extension may not work correctly and would need to be updated accordingly.
-  
-- **Error Handling**: Alerts are displayed if there’s an issue with fetching the image. For example:
-  - If the image cannot be found or downloaded.
-  - If the URL format is incorrect (e.g., the Instagram post is not in the expected format).
+## Troubleshooting
+
+- **If the image does not download**:  
+  Ensure that you're on a valid Instagram post URL (in the correct format: `https://www.instagram.com/p/*`).
+
+- **If the image doesn't appear**:  
+  Instagram may have changed the class names used for images. In that case, you may need to update the `targetClass` variable in the `popup.js` file with the latest class names used by Instagram's image elements.
