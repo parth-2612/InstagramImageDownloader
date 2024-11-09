@@ -1,0 +1,16 @@
+{
+    "manifest_version": 3,
+    "name": "Image Source Finder",
+    "version": "1.0",
+    "description": "Find and display the source URL of an image tag with a specific class.",
+    "permissions": ["activeTab", "scripting"],
+    "action": {
+      "default_popup": "popup.html"
+    },
+    "content_scripts": [
+      {
+        "matches": ["*:www.instagram.com/p/*"],
+        "js": ["popup.js"]
+      }
+    ]
+}
