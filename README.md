@@ -1,37 +1,196 @@
-This Chrome extension script is designed to download images from Instagram posts by identifying a specific image tag within the page. Here’s a breakdown of how it works and the components involved:
+# Image Source Finder - Instagram Image Downloader
 
-1. Manifest File (manifest.json)
-This file sets up the extension’s basic configuration:
+A Chrome extension to download images from Instagram posts by locating the image's source URL.
 
-manifest_version: Version 3, required for all Chrome extensions.
-name, version, and description: Basic information about the extension.
-permissions: The activeTab permission allows the extension to interact with the active tab, and scripting enables the script to run JavaScript within the webpage context.
-action: Specifies the default popup HTML file (popup.html), which appears when the extension icon is clicked.
-content_scripts: Defines which scripts to inject and where. Here, popup.js runs on URLs matching Instagram post URLs.
-2. Content Script (popup.js)
-This script finds and downloads the Instagram image:
+## Overview
 
-Target Class: It searches for the image element by its specific Instagram class (targetClass), a unique identifier for image elements in Instagram posts. The spaces in the class name are converted to dots to select the class correctly.
-Image Extraction: If the image is found, the script extracts its src URL to be used as the download source.
-Error Handling: If the image is not found, the script returns null.
-3. Popup HTML (popup.html)
-The popup provides the UI and includes a "Download Post" button to trigger the image download. Key parts include:
+This extension allows users to download the main image from an Instagram post directly from the browser. It uses a specific class to identify the image on the page and fetches its source URL to initiate a download.
 
-Button (findImageSrc): The button users click to initiate the image download process.
-SVG Icon: An icon representing download functionality.
-4. Main Script Logic in popup.js
-The popup.js script runs the core download functionality when the "Download Post" button is clicked:
+### Table of Contents
+- [Manifest File](#manifest-file)
+- [Content Script (popup.js)](#content-script-popupjs)
+- [Popup HTML (popup.html)](#popup-html-popuphtml)
+- [Main Script Logic](#main-script-logic)
+- [Usage](#usage)
+- [Limitations and Notes](#limitations-and-notes)
 
-Active Tab Query: Identifies the active tab.
-Script Injection: Executes the script on the Instagram page:
-Image Retrieval: Locates the image element with the target class name.
-Filename Creation: Uses part of the src URL to create a descriptive filename.
-Image Download: Fetches the image as a blob, then generates a temporary download link and programmatically clicks it to start the download.
-Error Handling: Displays alerts if the URL format is incorrect or the image fetch fails.
-Usage Summary
-Open an Instagram post.
-Click the extension icon.
-In the popup, click "Download Post" to download the post’s main image.
-Important Notes
-Limitations: This script may need updates if Instagram changes the class name for image elements.
-Error Handling: The alert messages provide feedback if the image retrieval fails.
+## Manifest File
+
+The `manifest.json` file sets up the extension’s configuration:
+
+- **`manifest_version`**: Set to 3, as required for all Chrome extensions.
+- **`name`, `version`, `description`**: Basic details about the extension.
+- **`permissions`**:
+  - `activeTab`: Allows interaction with the active tab.
+  - `scripting`: Enables the extension to execute JavaScript within the page.
+- **`action`**: Specifies `popup.html` as the popup file when the extension icon is clicked.
+- **`content_scripts`**: Defines `popup.js` to run on Instagram post URLs.
+
+**manifest.json**
+
+```json
+{
+    "manifest_version": 3,
+    "name": "Image Source Finder",
+    "version": "1.0",
+    "description": "Find and display the source URL of an image tag with a specific class.",
+    "permissions": ["activeTab", "scripting"],
+    "action": {
+      "default_popup": "popup.html"
+    },
+    "content_scripts": [
+      {
+        "matches": ["*:www.instagram.com/p/*"],
+        "js": ["popup.js"]
+      }
+    ]
+}
+```
+
+# Content Script - `popup.js`
+
+The content script in `popup.js` is responsible for finding and retrieving the image URL from an Instagram post.
+
+### Functionality
+
+The script identifies the main image on an Instagram post by targeting a specific class, retrieves its `src` URL, and returns it to be used as a download link.
+
+### Steps
+
+1. **Target Class**: Searches for the image element using a specific Instagram class (`targetClass`).
+2. **Image Extraction**: If an image element with this class is found, the script retrieves its `src` attribute to get the direct URL of the image.
+3. **Error Handling**: If no image is found with the specified class, the script returns `null`.
+
+### Code
+
+```javascript
+(() => {
+    const targetClass = "x5yr21d xu96u03 x10l6tqk x13vifvy x87ps6o xh8yej3";
+    const imgElement = document.querySelector(`img.${targetClass.replace(/ /g, ".")}`);
+
+    if (imgElement) {
+        return imgElement.src;
+    } else {
+        return null;
+    }
+})();
+```
+
+# Popup HTML - `popup.html`
+
+The `popup.html` file defines the user interface for the Chrome extension. This includes a button labeled "Download Post," which triggers the download function in `popup.js`.
+
+### Structure
+
+- **Button (`findImageSrc`)**: Clicking this button initiates the process to find and download the image from the Instagram post.
+- **SVG Icon**: A cloud-download icon, styled as part of the button, visually represents the download action.
+- **Message Area**: An empty paragraph (`<p id="message">`) for displaying status messages or instructions.
+
+### Code
+
+```html
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Image Src Finder</title>
+    <link rel="stylesheet" href="https://noble.htknetwork.in/css/demo1/style.css">
+</head>
+
+<body>
+    <div class="d-flex align-items-center flex-wrap text-nowrap m-4">
+        <p id="message"></p>
+        <button id="findImageSrc" type="button" class="btn btn-primary btn-sm mt-3 btn-icon-text mb-2 mb-md-0">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                class="feather feather-download-cloud btn-icon-prepend">
+                <polyline points="8 17 12 21 16 17"></polyline>
+                <line x1="12" y1="12" x2="12" y2="21"></line>
+                <path d="M20.88 18.09A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.29"></path>
+            </svg>
+            Download Post
+        </button>
+    </div>
+    <script src="popup.js"></script>
+</body>
+
+</html>
+```
+
+# Main Script Logic - `popup.js`
+
+The core logic in `popup.js` is executed when the "Download Post" button is clicked. This script performs several key actions to identify, fetch, and download the image from an Instagram post.
+
+### Key Functional Steps
+
+1. **Active Tab Query**: The script identifies the current active browser tab.
+2. **Script Injection**: Injects a script into the Instagram page that:
+   - Locates the image element using the specified `targetClass`.
+   - Extracts the `src` URL of the image and generates a filename.
+   - Initiates a download of the image as a `.jpg` file.
+3. **Error Handling**: If no image is found or there’s an issue with the URL, an alert is displayed to the user.
+
+### Code
+
+```javascript
+document.getElementById("findImageSrc").addEventListener("click", () => {
+  // Query the active tab in the current window
+  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+    if (tabs.length > 0) {
+      const tabId = tabs[0].id;
+      chrome.scripting.executeScript({
+        target: { tabId: tabId },
+        func: function() {
+          const targetClass = "x5yr21d xu96u03 x10l6tqk x13vifvy x87ps6o xh8yej3";
+          const imgElement = document.querySelector(`img.${targetClass.replace(/ /g, ".")}`);
+
+          if (imgElement) {
+            // Retrieve the image URL
+            const imageUrl = imgElement.src;
+            const urlParts = imageUrl.split('/');
+            const fileNameSlug = urlParts[urlParts.length - 2];
+            const fileName = fileNameSlug + ".jpg";
+
+            // Fetch the image and initiate a download
+            fetch(imageUrl)
+              .then(response => response.blob())
+              .then(blob => {
+                const downloadLink = document.createElement("a");
+                downloadLink.href = URL.createObjectURL(blob);
+                downloadLink.download = fileName;
+                downloadLink.style.display = "none";
+                
+                document.body.appendChild(downloadLink);
+                downloadLink.click();
+                document.body.removeChild(downloadLink);
+              })
+              .catch(error => {
+                alert("Failed to fetch the image: " + error.message);
+              });
+          } else {
+            alert("The URL seems incorrect. Please verify that the URL follows the correct format: \n\n https://www.instagram.com/p/*");
+          }
+        }
+      });
+    } else {
+      console.error("No active tab found.");
+    }
+  });
+});
+```
+
+# Usage
+
+1. Open an Instagram post in your browser.
+2. Click the **Image Source Finder** extension icon in your browser toolbar.
+3. In the popup that appears, click the **Download Post** button to download the main image.
+
+---
+
+# Limitations and Notes
+
+- **Class Dependency**: The extension relies on specific Instagram class names for identifying and extracting the image. If Instagram changes these class names, the extension may not work correctly and would need to be updated accordingly.
+  
+- **Error Handling**: Alerts are displayed if there’s an issue with fetching the image. For example:
+  - If the image cannot be found or downloaded.
+  - If the URL format is incorrect (e.g., the Instagram post is not in the expected format).
